@@ -19,7 +19,7 @@ public static void main(String[] args){
 }
 
 private void prepareGUI(){
-   mainFrame = new JFrame("Java SWING Examples");
+   mainFrame = new JFrame("Ubuntu's Dictionary LookUp");
    mainFrame.setSize(400,400);
    mainFrame.setLayout(new GridLayout(3, 1));
 
