@@ -32,42 +32,51 @@ public class DictionaryLookUp implements ActionListener {
 	JLabel label;
 	JButton button;
 	JButton bupdate;
+	JButton bclear;
 	JPanel panel;
 	static JTable table;
-	int band = 0;
+	int band = 0, TableNumber = 0, ntable = 0;
 	Component ob;
 	Connection con;
 	ThrowTableException throwTableException;
 	String sql;
 	String driverName = "com.mysql.jdbc.Driver";
-	String[] columnNames = { "id", "keyword", "LinuxCommand", "Details", "Description" };
+	String[] columnNumber0 = { "id", "keyword", "LinuxCommand", "Details", "Description" };
+	String[] columNumber1 = { "id", "Title", "Link" };
+	String[] columNumber2={"id", "Topic", "Description", "Link"};
+	String[] columNumber3 = { "id", "Title", "Link" };
+	String[] columNumber4 = { "id", "Title", "Description", "Link" };
+	String[][] columns = { columnNumber0, columNumber1, columNumber2, columNumber3, columNumber4};
 	Process runtimeProcess;
 	Properties prop;
 	InputStream input;
-	
+
 	public DictionaryLookUp() {
-		 prop = new Properties();
+		prop = new Properties();
 		input = null;
 		File file = new File("/opt/DictionaryLookupSW/config.properties");
 		File file2 = new File("/opt/DictionaryLookupSW/fromServertoLocalhost.sh");
 		File file3 = new File("/opt/DictionaryLookupSW/localhostToserver.sh");
 		File file4 = new File("/opt/DictionaryLookupSW/progressbar.sh");
-		if(file.exists()==false)
-			JOptionPane.showMessageDialog(null, "/opt/DictionaryLookupSW/config.properties", "File Not Found", JOptionPane.WARNING_MESSAGE);
-		if(file2.exists()==false)
-			JOptionPane.showMessageDialog(null, "/opt/DictionaryLookupSW/fromServertoLocalhost.sh", "File Not Found", JOptionPane.WARNING_MESSAGE);
-		if(file3.exists()==false)
-			JOptionPane.showMessageDialog(null,  "/opt/DictionaryLookupSW/localhostToserver.sh", "File Not Found", JOptionPane.WARNING_MESSAGE);
-		if(file4.exists()==false)
-			JOptionPane.showMessageDialog(null, "/opt/DictionaryLookupSW/progressbar.sh", "File Not Found", JOptionPane.WARNING_MESSAGE);
+		if (file.exists() == false)
+			JOptionPane.showMessageDialog(null, "/opt/DictionaryLookupSW/config.properties", "File Not Found",
+					JOptionPane.WARNING_MESSAGE);
+		if (file2.exists() == false)
+			JOptionPane.showMessageDialog(null, "/opt/DictionaryLookupSW/fromServertoLocalhost.sh", "File Not Found",
+					JOptionPane.WARNING_MESSAGE);
+		if (file3.exists() == false)
+			JOptionPane.showMessageDialog(null, "/opt/DictionaryLookupSW/localhostToserver.sh", "File Not Found",
+					JOptionPane.WARNING_MESSAGE);
+		if (file4.exists() == false)
+			JOptionPane.showMessageDialog(null, "/opt/DictionaryLookupSW/progressbar.sh", "File Not Found",
+					JOptionPane.WARNING_MESSAGE);
 		try {
 			input = new FileInputStream("/opt/DictionaryLookupSW/config.properties");
 			prop.load(input);
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, e.getMessage().toString(),"Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, e.getMessage().toString(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
-	
 
 	public void createUI() {
 		frame = new JFrame("Database Search Result");
@@ -81,8 +90,12 @@ public class DictionaryLookUp implements ActionListener {
 		button.setBounds(80, 100, 150, 20);
 		button.addActionListener(this);
 		bupdate = new JButton("update");
+		bclear=new JButton("clear");
+		bclear.setBounds(160, 140, 150, 20);
+		bclear.addActionListener(this);
 		bupdate.setBounds(250, 100, 150, 20);
 		bupdate.addActionListener(this);
+		frame.add(bclear);
 		frame.add(textbox);
 		frame.add(label);
 		frame.add(button);
@@ -97,6 +110,8 @@ public class DictionaryLookUp implements ActionListener {
 		bSelected = this.button.getLabel();
 		System.out.println("Showing Table Data.......");
 		System.out.println("Selected Button" + bSelected);
+		if(bSelected.equals("clear"))
+			clearTextbox();
 		if (bSelected.equals("search"))
 			showTableData();
 		else if (bSelected.equals("update"))
@@ -106,6 +121,10 @@ public class DictionaryLookUp implements ActionListener {
 				JOptionPane.showMessageDialog(null, e.getMessage());
 			}
 	}
+	
+	public void clearTextbox(){
+		textbox.setText("");
+	}
 
 	private void updatedb() {
 		System.out.println("is going to update");
@@ -114,8 +133,9 @@ public class DictionaryLookUp implements ActionListener {
 		try {
 			Class.forName(driverName);
 
-			con = DriverManager.getConnection(prop.getProperty("externalhosturl"), prop.getProperty("externalhostuserName"), prop.getProperty("externalhostpassword"));
-			sql=prop.getProperty("countTables");
+			con = DriverManager.getConnection(prop.getProperty("externalhosturl"),
+					prop.getProperty("externalhostuserName"), prop.getProperty("externalhostpassword"));
+			sql = prop.getProperty("countTables");
 
 			PreparedStatement ps = con.prepareStatement(sql);
 			ResultSet rs = ps.executeQuery();
@@ -126,7 +146,8 @@ public class DictionaryLookUp implements ActionListener {
 			throwTableException.checkTables(Integer.parseInt(rs.getString("count(*)")));
 			con.close();
 		} catch (TablesNotFoundException ex) {
-			JOptionPane.showMessageDialog(null, "Error while reading database data              ", "database corrupted!", JOptionPane.WARNING_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Error while reading database data              ",
+					"database corrupted!", JOptionPane.WARNING_MESSAGE);
 
 			errorType = 1;
 		} catch (Exception ex) {
@@ -137,7 +158,8 @@ public class DictionaryLookUp implements ActionListener {
 
 		if (errorType > 0) {
 			System.out.println("Restoring Database from LocalHost");
-			JOptionPane.showMessageDialog(null, "from LocalHost to Server!     ", "Restoring Database", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(null, "from LocalHost to Server!     ", "Restoring Database",
+					JOptionPane.INFORMATION_MESSAGE);
 			try {
 				String[] cmd = { "/bin/sh", "/opt/DictionaryLookupSW/localhostToserver.sh" };
 				Process pr = Runtime.getRuntime().exec(cmd);
@@ -161,13 +183,14 @@ public class DictionaryLookUp implements ActionListener {
 				Process pr = Runtime.getRuntime().exec(cmd);
 				String[] cmd2 = { "/bin/sh", "/opt/DictionaryLookupSW/progressbar.sh" };
 				Runtime.getRuntime().exec(cmd2);
-				
+
 				bupdate.setEnabled(false);
 				button.setEnabled(false);
 				Thread.sleep(50000);
 				bupdate.setEnabled(true);
 				button.setEnabled(true);
-				JOptionPane.showMessageDialog(null, "Database's Localhost", "Database Updated", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(null, "Database's Localhost", "Database Updated",
+						JOptionPane.INFORMATION_MESSAGE);
 			} catch (Exception e) {
 				JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			}
@@ -179,7 +202,7 @@ public class DictionaryLookUp implements ActionListener {
 		frame1.setLayout(new BorderLayout());
 		int i = 0;
 		DefaultTableModel model = new DefaultTableModel();
-		model.setColumnIdentifiers(columnNames);
+		model.setColumnIdentifiers(columns[TableNumber]);
 		table = new JTable();
 		table.setModel(model);
 		table.setAutoResizeMode(4);
@@ -189,47 +212,95 @@ public class DictionaryLookUp implements ActionListener {
 		scroll.setVerticalScrollBarPolicy(20);
 		String textvalue = textbox.getText();
 		String id = "";
-		String keyword = "";
-		String linuxCommand = "";
+		String keyword = "", title = "", topic="";
+		String linuxCommand = "", link = "";
 		String details = "";
 		String description = "";
 		try {
 			Class.forName(driverName);
-			con=DriverManager.getConnection(prop.getProperty("localhosturl"), prop.getProperty("localhostuserName"), prop.getProperty("localhostpassword"));
-			if ((textvalue.equals("")) || (textvalue.equals(null)) ||textvalue.equals(" "))
-				sql = prop.getProperty("simpleSelect");
+			con = DriverManager.getConnection(prop.getProperty("localhosturl"), prop.getProperty("localhostuserName"),
+					prop.getProperty("localhostpassword"));
+			sql = prop.getProperty("countTables");
+
+			PreparedStatement ps2 = con.prepareStatement(sql);
+			ResultSet rs2 = ps2.executeQuery();
+			throwTableException = new ThrowTableException();
+			if (rs2.next()) {
+				ntable = Integer.parseInt(rs2.getString("count(*)"));
+			}
+
+			if ((textvalue.equals("")) || (textvalue.equals(null)) || textvalue.equals(" "))
+				sql = prop.getProperty("simpleSelect" + TableNumber);
 			else
-				sql=prop.getProperty("selectCondition")+ "'"+textvalue+"'";
+				sql = prop.getProperty("selectCondition" + TableNumber) + " '%" + textvalue + "%'";
 			System.out.println("Query output: " + sql);
 			PreparedStatement ps = con.prepareStatement(sql);
 			ResultSet rs = ps.executeQuery();
 
 			while (rs.next()) {
-				id = rs.getString("id");
-				keyword = rs.getString("keyword");
-				linuxCommand = rs.getString("linuxCommand");
-				details = rs.getString("details");
-				description = rs.getString("description");
-				model.addRow(new Object[] { id, keyword, linuxCommand, details, description });
+				if (TableNumber == 0) {
+					id = rs.getString("id");
+					keyword = rs.getString("keyword");
+					linuxCommand = rs.getString("linuxCommand");
+					details = rs.getString("details");
+					description = rs.getString("description");
+					model.addRow(new Object[] { id, keyword, linuxCommand, details, description });
+					TableNumber = 0;
+				} else if (TableNumber == 1) {
+					id = rs.getString("id");
+					title = rs.getString("title");
+					link = rs.getString("link");
+					model.addRow(new Object[] { id, title, link });
+					TableNumber = 0;
+				}else if (TableNumber == 2) {
+					id = rs.getString("id");
+					topic = rs.getString("topic");
+					description= rs.getString("description");
+					link = rs.getString("link");
+					model.addRow(new Object[] { id, topic, description, link });
+					TableNumber = 0;
+				}else if (TableNumber == 3) {
+					id = rs.getString("id");
+					title = rs.getString("title");
+					link = rs.getString("link");
+					model.addRow(new Object[] { id, title, link });
+					TableNumber = 0;
+				}else if (TableNumber == 4) {
+					id = rs.getString("id");
+					title = rs.getString("title");
+					description = rs.getString("description");
+					link = rs.getString("link");
+					model.addRow(new Object[] { id, title, description, link });
+					TableNumber = 0;
+				}
+								
 
 				i++;
+				ntable = 0;
 			}
 			if (i < 1) {
-				JOptionPane.showMessageDialog(null, "No Record Found", "Error", JOptionPane.ERROR_MESSAGE);
-			   frame1.dispose();
-			} else {
-				System.out.println(i + " Records Found");
-			}
+				if(TableNumber<6)
+				TableNumber++;
+				if (TableNumber < ntable) {
+					showTableData();
+				}  
+				if(TableNumber==5){
+					con.close();
+					TableNumber = 0;
+					JOptionPane.showMessageDialog(null, "No Record Found", "Error", JOptionPane.ERROR_MESSAGE);
+					frame1.dispose();
+				}
+			} 
 			con.close();
 		} catch (Exception ex) {
-			JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, ex.getMessage(), "Error ", JOptionPane.ERROR_MESSAGE);
 		}
 
 		if (i > 0) {
 			frame1.add(scroll);
 			frame1.setVisible(true);
-			if(i<701)
-			frame1.setSize(1000, 100 * i);
+			if (i < 701)
+				frame1.setSize(1000, 100 * i);
 			else
 				frame.setSize(1000, 700);
 		}
