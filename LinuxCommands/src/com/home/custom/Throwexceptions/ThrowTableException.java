@@ -8,8 +8,8 @@ public class ThrowTableException {
 	public ThrowTableException() {
 		this.nTablesFound=nTablesFound;
 	}
-	public void checkTables(int nTablesFound) throws TablesNotFoundException{
-		if(nTablesFound>0){
+	public void checkTables(int externalnTablesf, int internalnTablesf) throws TablesNotFoundException{
+		if(externalnTablesf==internalnTablesf){
 			this.nTablesFound=nTablesFound;
 		}
 		

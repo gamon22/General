@@ -37,16 +37,17 @@ public class DictionaryLookUp implements ActionListener {
 	static JTable table;
 	int band = 0, TableNumber = 0, ntable = 0;
 	Component ob;
-	Connection con;
+	Connection con, con2;
 	ThrowTableException throwTableException;
-	String sql;
+	String sql, sql2;
 	String driverName = "com.mysql.jdbc.Driver";
 	String[] columnNumber0 = { "id", "keyword", "LinuxCommand", "Details", "Description" };
 	String[] columNumber1 = { "id", "Title", "Link" };
-	String[] columNumber2={"id", "Topic", "Description", "Link"};
+	String[] columNumber2={"id", "Topic", "Description", "Link", "Link Relation"};
 	String[] columNumber3 = { "id", "Title", "Link" };
 	String[] columNumber4 = { "id", "Title", "Description", "Link" };
-	String[][] columns = { columnNumber0, columNumber1, columNumber2, columNumber3, columNumber4};
+	String[] columNumber5 = { "id", "keyword", "type", "date", "time", "name", "brand", "model", "serial number", "values", "Relation With", "details", "input", "output", "comments" };
+	String[][] columns = { columnNumber0, columNumber1, columNumber2, columNumber3, columNumber4, columNumber5};
 	Process runtimeProcess;
 	Properties prop;
 	InputStream input;
@@ -136,14 +137,21 @@ public class DictionaryLookUp implements ActionListener {
 			con = DriverManager.getConnection(prop.getProperty("externalhosturl"),
 					prop.getProperty("externalhostuserName"), prop.getProperty("externalhostpassword"));
 			sql = prop.getProperty("countTables");
+			con2 = DriverManager.getConnection(prop.getProperty("localhosturl"),
+					prop.getProperty("localhostuserName"), prop.getProperty("localhostpassword"));
+			sql2 = prop.getProperty("countTables");
 
 			PreparedStatement ps = con.prepareStatement(sql);
 			ResultSet rs = ps.executeQuery();
+			PreparedStatement ps2 = con2.prepareStatement(sql2);
+			ResultSet rs2 = ps2.executeQuery();
 			throwTableException = new ThrowTableException();
 			if (rs.next()) {
 				System.out.println("Tables Found:" + Integer.parseInt(rs.getString("count(*)")));
 			}
-			throwTableException.checkTables(Integer.parseInt(rs.getString("count(*)")));
+			if(rs2.next())
+			//throwTableException.checkTables(Integer.parseInt(rs.getString("count(*)")), Integer.parseInt(rs2.getString("count(*)")));
+				throwTableException.checkTables(Integer.parseInt(rs.getString("count(*)")), Integer.parseInt(rs2.getString("count(*)")));
 			con.close();
 		} catch (TablesNotFoundException ex) {
 			JOptionPane.showMessageDialog(null, "Error while reading database data              ",
@@ -211,9 +219,9 @@ public class DictionaryLookUp implements ActionListener {
 		scroll.setHorizontalScrollBarPolicy(30);
 		scroll.setVerticalScrollBarPolicy(20);
 		String textvalue = textbox.getText();
-		String id = "";
-		String keyword = "", title = "", topic="";
-		String linuxCommand = "", link = "";
+		String id = "", type="", name="", date="", time="", brand="", mmodel="", input="", output="", comments="";
+		String keyword = "", title = "", topic="", serialno="", values="", relationw;
+		String linuxCommand = "", link = "", link2="";
 		String details = "";
 		String description = "";
 		try {
@@ -257,7 +265,8 @@ public class DictionaryLookUp implements ActionListener {
 					topic = rs.getString("topic");
 					description= rs.getString("description");
 					link = rs.getString("link");
-					model.addRow(new Object[] { id, topic, description, link });
+					link2=rs.getString("linkrelation");
+					model.addRow(new Object[] { id, topic, description, link, link2});
 					TableNumber = 0;
 				}else if (TableNumber == 3) {
 					id = rs.getString("id");
@@ -272,6 +281,24 @@ public class DictionaryLookUp implements ActionListener {
 					link = rs.getString("link");
 					model.addRow(new Object[] { id, title, description, link });
 					TableNumber = 0;
+				}else if (TableNumber == 5) {
+					id = rs.getString("id");
+					keyword = rs.getString("keyword");
+					type = rs.getString("type");
+					date = rs.getString("date");
+					time = rs.getString("time");
+					name = rs.getString("name");
+					brand = rs.getString("brand");
+					mmodel = rs.getString("model");
+					serialno = rs.getString("serialno");
+					values = rs.getString("valuess");
+					relationw = rs.getString("relationw");
+					details = rs.getString("details");
+					input = rs.getString("input");
+					output = rs.getString("output");
+					comments = rs.getString("comments");
+					model.addRow(new Object[] { id, keyword, type, date, time, name, brand, mmodel, serialno, values, relationw, details, input, output, comments });
+					TableNumber = 0;
 				}
 								
 
@@ -279,12 +306,12 @@ public class DictionaryLookUp implements ActionListener {
 				ntable = 0;
 			}
 			if (i < 1) {
-				if(TableNumber<6)
+				if(TableNumber<7)
 				TableNumber++;
 				if (TableNumber < ntable) {
 					showTableData();
 				}  
-				if(TableNumber==5){
+				if(TableNumber==6){
 					con.close();
 					TableNumber = 0;
 					JOptionPane.showMessageDialog(null, "No Record Found", "Error", JOptionPane.ERROR_MESSAGE);
