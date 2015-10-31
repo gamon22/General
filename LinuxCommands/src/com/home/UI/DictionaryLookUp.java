@@ -150,7 +150,6 @@ public class DictionaryLookUp implements ActionListener {
 				System.out.println("Tables Found:" + Integer.parseInt(rs.getString("count(*)")));
 			}
 			if(rs2.next())
-			//throwTableException.checkTables(Integer.parseInt(rs.getString("count(*)")), Integer.parseInt(rs2.getString("count(*)")));
 				throwTableException.checkTables(Integer.parseInt(rs.getString("count(*)")), Integer.parseInt(rs2.getString("count(*)")));
 			con.close();
 		} catch (TablesNotFoundException ex) {
