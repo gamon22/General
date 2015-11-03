@@ -113,8 +113,11 @@ public class DictionaryLookUp implements ActionListener {
 		System.out.println("Selected Button" + bSelected);
 		if(bSelected.equals("clear"))
 			clearTextbox();
-		if (bSelected.equals("search"))
+		if (bSelected.equals("search")){
+			ntable = 0;
+			TableNumber = 0;
 			showTableData();
+		}
 		else if (bSelected.equals("update"))
 			try {
 				updatedb();
@@ -223,6 +226,7 @@ public class DictionaryLookUp implements ActionListener {
 		String linuxCommand = "", link = "", link2="";
 		String details = "";
 		String description = "";
+		
 		try {
 			Class.forName(driverName);
 			con = DriverManager.getConnection(prop.getProperty("localhosturl"), prop.getProperty("localhostuserName"),
@@ -252,13 +256,11 @@ public class DictionaryLookUp implements ActionListener {
 					details = rs.getString("details");
 					description = rs.getString("description");
 					model.addRow(new Object[] { id, keyword, linuxCommand, details, description });
-					TableNumber = 0;
 				} else if (TableNumber == 1) {
 					id = rs.getString("id");
 					title = rs.getString("title");
 					link = rs.getString("link");
 					model.addRow(new Object[] { id, title, link });
-					TableNumber = 0;
 				}else if (TableNumber == 2) {
 					id = rs.getString("id");
 					topic = rs.getString("topic");
@@ -266,20 +268,17 @@ public class DictionaryLookUp implements ActionListener {
 					link = rs.getString("link");
 					link2=rs.getString("linkrelation");
 					model.addRow(new Object[] { id, topic, description, link, link2});
-					TableNumber = 0;
 				}else if (TableNumber == 3) {
 					id = rs.getString("id");
 					title = rs.getString("title");
 					link = rs.getString("link");
 					model.addRow(new Object[] { id, title, link });
-					TableNumber = 0;
 				}else if (TableNumber == 4) {
 					id = rs.getString("id");
 					title = rs.getString("title");
 					description = rs.getString("description");
 					link = rs.getString("link");
 					model.addRow(new Object[] { id, title, description, link });
-					TableNumber = 0;
 				}else if (TableNumber == 5) {
 					id = rs.getString("id");
 					keyword = rs.getString("keyword");
@@ -297,13 +296,13 @@ public class DictionaryLookUp implements ActionListener {
 					output = rs.getString("output");
 					comments = rs.getString("comments");
 					model.addRow(new Object[] { id, keyword, type, date, time, name, brand, mmodel, serialno, values, relationw, details, input, output, comments });
-					TableNumber = 0;
 				}
 								
 
 				i++;
-				ntable = 0;
 			}
+			
+				
 			if (i < 1) {
 				if(TableNumber<7)
 				TableNumber++;
