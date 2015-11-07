@@ -9,7 +9,7 @@ public class ThrowTableException {
 		this.nTablesFound=nTablesFound;
 	}
 	public void checkTables(int externalnTablesf, int internalnTablesf) throws TablesNotFoundException{
-		if(externalnTablesf==internalnTablesf){
+		if(externalnTablesf>internalnTablesf || externalnTablesf == internalnTablesf){
 			this.nTablesFound=nTablesFound;
 		}
 		
